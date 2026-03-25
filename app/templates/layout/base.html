@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Wizarding Academy Hub{% endblock %}</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='Imagen_Slytherin.png') }}" alt="Slytherin" class="crest crest-left">
+            <h1 class="academy-title">Wizarding Academy</h1>
+            <img src="{{ url_for('static', filename='Imagen_Gryffindor.png') }}" alt="Gryffindor" class="crest crest-right">
+        </div>
+        <nav class="main-nav">
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}">Inicio</a></li>
+                <li class="dropdown">
+                    <a href="#">Estudiantes</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/add_estudiante">Registrar</a></li>
+                        <li><a href="/estudiantes">Lista</a></li>
+                        <li><a href="/buscar_estudiante">Reporte</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Profesores</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/add_profesor">Registrar</a></li>
+                        <li><a href="/profesores">Lista</a></li>
+                        <li><a href="/buscar_profesor">Reporte</a></li>
+                        <li><a href="/asignar_curso">Asignar Curso</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Académico</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/categorias">Categorías</a></li>
+                        <li><a href="/matricula">Matrícula</a></li>
+                        <li><a href="/asignar_nota">Notas</a></li>
+                        <li><a href="/certificados">Certificados</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2024 Wizarding Academy Hub. Todos los derechos reservados.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

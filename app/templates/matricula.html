@@ -1,106 +1,88 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Matrícula</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='matricula.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <h1>Registrar Matrícula</h1>
+{% extends 'layout/base.html' %}
+
+{% block title %}Registrar Matrícula - Wizarding Academy Hub{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Registro de Matrícula</h2>
+    
     <form method="POST">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul class="flashes">
-        {% for category, message in messages %}
-        <div class="alert">
-            {{ message }}
+        <div class="form-group">
+            <label for="dni_estudiante">DNI Estudiante:</label>
+            <input type="text" id="dni_estudiante" name="dni_estudiante" placeholder="Ingrese DNI..." required autofocus>
         </div>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
 
-        <label for="dni_estudiante">DNI Estudiante:</label>
-        <input type="text" id="dni_estudiante" name="dni_estudiante" required autofocus>
+        <div class="form-group">
+            <label for="nombre_estudiante">Nombre Estudiante:</label>
+            <input type="text" id="nombre_estudiante" name="nombre_estudiante" placeholder="Se cargará automáticamente..." readonly>
+        </div>
 
-        <label for="nombre_estudiante">Nombre Estudiante:</label>
-        <input type="text" id="nombre_estudiante" name="nombre_estudiante" readonly>
+        <div class="form-group">
+            <label for="id_categoria">Categoría:</label>
+            <select id="id_categoria" name="id_categoria" required>
+                <option value="" disabled selected>Seleccione una categoría</option>
+                {% for categoria in categorias %}
+                    <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <label for="id_categoria">Categoría:</label>
-        <select id="id_categoria" name="id_categoria" required>
-            <option value="" disabled selected>Seleccione una categoría</option>
-            {% for categoria in categorias %}
-            <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
-            {% endfor %}
-        </select>
+        <div class="form-group">
+            <label for="id_curso">Curso:</label>
+            <select id="id_curso" name="id_curso" required>
+                <option value="" disabled selected>Seleccione un curso</option>
+                {% for curso in cursos %}
+                    <option value="{{ curso.id_curso }}">{{ curso.nombre_curso }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <label for="id_curso">Curso:</label>
-        <select id="id_curso" name="id_curso" required>
-            <option value="" disabled selected>Seleccione un curso</option>
-            {% for curso in cursos %}
-                <option value="{{ curso.id_curso }}">{{ curso.nombre_curso }}</option>
-            {% endfor %}
-        </select>
+        <div class="form-group">
+            <label for="fecha_matricula">Fecha de Matrícula:</label>
+            <input type="date" id="fecha_matricula" name="fecha_matricula" required>
+        </div>
 
-        <label for="fecha_matricula">Fecha de Matrícula:</label>
-        <input type="date" id="fecha_matricula" name="fecha_matricula" required>
-
-        <div class="button-container">
+        <div class="button-group">
             <button type="submit" class="btn">Registrar Matrícula</button>
-            <a href="{{ url_for('index') }}" class="button button-back">Back</a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Regresar</a>
         </div>
     </form>
+</div>
+{% endblock %}
 
-    <script>
-
-        // JS para cargar cursos según la categoría seleccionada
-        $(document).ready(function() {
-            $('#id_categoria').change(function() {
-                var categoria_id = $(this).val();
-                if (categoria_id != "") {
-                    $.ajax({
-                        url: '/get_courses/' + categoria_id,
-                        type: 'GET',
-                        success: function(response) {
-                            $('#id_curso').empty();
-                            $('#id_curso').append('<option value="" disabled selected>Seleccione un curso</option>');
-                            $.each(response, function(index, curso) {
-                                $('#id_curso').append('<option value="' + curso.id_curso + '">' + curso.nombre_curso + '</option>');
-                            });
-                        },
-                        error: function(error) {
-                            console.log('Error fetching courses:', error);
-                        }
-                    });
-                } else {
-                    $('#id_curso').empty();
-                    $('#id_curso').append('<option value="" disabled selected>Seleccione un curso</option>');
-                }
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#id_categoria').change(function() {
+        var categoria_id = $(this).val();
+        if (categoria_id != "") {
+            $.get('/get_courses/' + categoria_id, function(response) {
+                $('#id_curso').empty().append('<option value="" disabled selected>Seleccione un curso</option>');
+                $.each(response, function(index, curso) {
+                    $('#id_curso').append('<option value="' + curso.id_curso + '">' + curso.nombre_curso + '</option>');
+                });
             });
+        }
+    });
 
-            // Actualizar el nombre del estudiante cuando se ingresa el DNI
-            $('#dni_estudiante').on('input', function() {
-                var dniEstudiante = this.value.trim();
-                if (dniEstudiante) {
-                    fetch(`/get_student_name_by_dni/${dniEstudiante}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.nombre_completo) {
-                                $('#nombre_estudiante').val(data.nombre_completo);
-                            } else {
-                                $('#nombre_estudiante').val('Estudiante no encontrado');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
+    $('#dni_estudiante').on('input', function() {
+        var dniEstudiante = this.value.trim();
+        if (dniEstudiante.length >= 4) {
+            $.get(`/get_student_name_by_dni/${dniEstudiante}`, function(data) {
+                if (data.nombre_completo) {
+                    $('#nombre_estudiante').val(data.nombre_completo);
                 } else {
                     $('#nombre_estudiante').val('');
                 }
             });
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+    
+    // Set default date to today
+    if(!$('#fecha_matricula').val()){
+        $('#fecha_matricula').val(new Date().toISOString().split('T')[0]);
+    }
+});
+</script>
+{% endblock %}

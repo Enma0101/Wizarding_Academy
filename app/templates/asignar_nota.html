@@ -1,26 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asignar Notas</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='notas.css') }}">
-</head>
-<body>
-    <div class="flash-messages">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    <h1>Asignar Notas</h1>
+{% extends 'layout/base.html' %}
+
+{% block title %}Asignar Notas - Wizarding Academy Hub{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Asignar Notas de Evaluación</h2>
+    
     <form id="nota-form" action="/asignar_nota" method="POST">
-        <div>
+        <div class="form-group">
             <label for="categoria">Categoría:</label>
             <select id="categoria" name="categoria" required>
                 <option value="">Selecciona una categoría</option>
@@ -29,7 +16,8 @@
                 {% endfor %}
             </select>
         </div>
-        <div>
+
+        <div class="form-group">
             <label for="id_curso">Curso:</label>
             <select id="id_curso" name="id_curso" required>
                 <option value="" disabled selected>Seleccione un curso</option>
@@ -38,81 +26,72 @@
                 {% endfor %}
             </select>
         </div>
-        <div>
+
+        <div class="form-group">
             <label for="dni_estudiante">DNI Estudiante:</label>
-            <input type="text" id="dni_estudiante" name="id_estudiante" required autofocus>
+            <input type="text" id="dni_estudiante" name="id_estudiante" placeholder="Ingrese DNI..." required autofocus>
+            <p id="studentNotFound" class="error-message" style="display: none;">Estudiante no encontrado.</p>
         </div>
-        <div>
+
+        <div class="form-group">
             <label for="dni_estudiante_display">Estudiante:</label>
-            <input type="text" id="dni_estudiante_display" name="nombre_estudiante" readonly>
+            <input type="text" id="dni_estudiante_display" name="nombre_estudiante" placeholder="Se cargará automáticamente..." readonly>
         </div>
-        <div>
-            <label for="campo-notas">Nota:</label>
+
+        <div class="form-group">
+            <label for="campo-notas">Nota (0-20):</label>
             <input type="number" id="campo-notas" name="nota" min="0" max="20" required value="{{ nota_existente if nota_existente is not none else '' }}">
-            {% if nota_existente is not none %}
-                <button type="submit" class="btn">Actualizar nota</button>
-            {% else %}
-                <button type="submit" class="btn">Agregar nota</button>
-            {% endif %}
-            <a href="{{ url_for('index') }}" class="button button-back">Back</a>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn">
+                {% if nota_existente is not none %} Actualizar Nota {% else %} Agregar Nota {% endif %}
+            </button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Regresar</a>
         </div>
     </form>
+</div>
+{% endblock %}
 
-    <script>
-        $(document).ready(function() {
-            $('#categoria').change(function() {
-                var categoria_id = $(this).val();
-                if (categoria_id != "") {
-                    $.ajax({
-                        url: '/get_courses/' + categoria_id,
-                        type: 'GET',
-                        success: function(response) {
-                            $('#id_curso').empty();
-                            $('#id_curso').append('<option value="" disabled selected>Seleccione un curso</option>');
-                            $.each(response, function(index, curso) {
-                                $('#id_curso').append('<option value="' + curso.id_curso + '">' + curso.nombre_curso + '</option>');
-                            });
-                        },
-                        error: function(error) {
-                            console.log('Error fetching courses:', error);
-                        }
-                    });
-                } else {
-                    $('#id_curso').empty();
-                    $('#id_curso').append('<option value="" disabled selected>Seleccione un curso</option>');
-                }
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#categoria').change(function() {
+        var categoria_id = $(this).val();
+        if (categoria_id != "") {
+            $.get('/get_courses/' + categoria_id, function(response) {
+                $('#id_curso').empty().append('<option value="" disabled selected>Seleccione un curso</option>');
+                $.each(response, function(index, curso) {
+                    $('#id_curso').append('<option value="' + curso.id_curso + '">' + curso.nombre_curso + '</option>');
+                });
             });
+        }
+    });
 
-            $('#dni_estudiante').on('input', function() {
-                var dniEstudiante = this.value.trim();
-                if (dniEstudiante) {
-                    fetch(`/get_student_name_by_dni/${dniEstudiante}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.nombre_completo) {
-                                $('#dni_estudiante_display').val(data.nombre_completo);
-                            } else {
-                                $('#dni_estudiante_display').val('Estudiante no encontrado');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching student name:', error);
-                        });
+    $('#dni_estudiante').on('input', function() {
+        var dniEstudiante = this.value.trim();
+        if (dniEstudiante.length >= 4) {
+            $.get(`/get_student_name_by_dni/${dniEstudiante}`, function(data) {
+                if (data.nombre_completo) {
+                    $('#dni_estudiante_display').val(data.nombre_completo);
+                    $('#studentNotFound').hide();
                 } else {
                     $('#dni_estudiante_display').val('');
+                    $('#studentNotFound').show();
                 }
             });
+        }
+    });
 
-            $('#campo-notas').on('input', function() {
-                var nota = parseFloat(this.value);
-                if (isNaN(nota) || nota < 0 || nota > 20) {
-                    this.setCustomValidity('La nota debe estar entre 0 y 20');
-                } 
-                else {
-                    this.setCustomValidity('');
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+    $('#campo-notas').on('input', function() {
+        var nota = parseFloat(this.value);
+        if (isNaN(nota) || nota < 0 || nota > 20) {
+            this.setCustomValidity('La nota debe estar entre 0 y 20');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+});
+</script>
+{% endblock %}

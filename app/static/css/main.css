@@ -1,0 +1,312 @@
+/* root variables for a premium Wizarding theme */
+:root {
+    --primary-red: #4F0F19;
+    --gold: #d4a105;
+    --gold-hover: #e8bb05;
+    --dark-bg: #1a1a1a;
+    --card-bg: rgba(51, 51, 51, 0.9);
+    --text-white: #ffffff;
+    --text-muted: #e0e0e0;
+    --border-color: #444;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    --transition: all 0.3s ease;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto Condensed', sans-serif;
+    background-color: var(--primary-red);
+    color: var(--text-white);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header & Navigation */
+.main-header {
+    background: linear-gradient(to bottom, #300a10, var(--primary-red));
+    padding: 1rem 0;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.crest {
+    max-width: 80px;
+    height: auto;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+}
+
+.academy-title {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    color: var(--gold);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    text-align: center;
+}
+
+.main-nav {
+    background-color: var(--gold);
+    margin-top: 15px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.nav-links li {
+    position: relative;
+}
+
+.nav-links a {
+    display: block;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: var(--transition);
+}
+
+.nav-links a:hover {
+    background-color: var(--gold-hover);
+    color: #000;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--dark-bg);
+    min-width: 180px;
+    box-shadow: var(--shadow);
+    list-style: none;
+    padding: 0;
+    z-index: 10;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li a {
+    color: var(--text-white);
+    padding: 10px 15px;
+}
+
+.dropdown-menu li a:hover {
+    background-color: var(--gold);
+    color: #333;
+}
+
+/* Content Container */
+.container {
+    flex: 1;
+    max-width: 1200px;
+    width: 95%;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+/* Alerts */
+.alert-container {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 12px 20px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.alert-success { background-color: #2e7d32; color: white; }
+.alert-danger { background-color: #c62828; color: white; }
+
+/* Tables (Responsive Wrapper) */
+.table-responsive {
+    overflow-x: auto;
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background-color: var(--gold);
+    color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+tr:hover {
+    background-color: rgba(212, 161, 5, 0.1);
+}
+
+/* Buttons */
+.button, .btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: var(--gold);
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+}
+
+.button:hover, .btn:hover {
+    background-color: var(--gold-hover);
+    transform: translateY(-2px);
+}
+
+/* Forms */
+.form-card {
+    background-color: var(--card-bg);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-field, 
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #262626;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: var(--transition);
+}
+
+.input-field:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 5px rgba(212, 161, 5, 0.3);
+}
+
+.name-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.error-message {
+    color: #ff5252;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+}
+
+.btn-secondary:hover {
+    background-color: var(--gold);
+    color: #000;
+}
+
+/* Footer & Other */
+.main-footer {
+    background-color: #300a10;
+    padding: 20px;
+    text-align: center;
+    border-top: 2px solid var(--gold);
+    margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .academy-title {
+        font-size: 1.8rem;
+    }
+    
+    .crest {
+        max-width: 50px;
+    }
+
+    .nav-links a {
+        padding: 10px 15px;
+        font-size: 1rem;
+    }
+
+    .dropdown-menu {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}

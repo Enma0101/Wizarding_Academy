@@ -1,96 +1,97 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generar Certificado</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='certificados.css') }}">
-</head>
-<body>
-    <div class="flash-messages">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    <h1>Certificado</h1>
+{% extends 'layout/base.html' %}
+
+{% block title %}Generar Certificado - Wizarding Academy Hub{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Emisión de Certificados Mágicos</h2>
+    
     <form id="certificadoForm" action="{{ url_for('generar_certificado') }}" method="post">
-        <label for="dni_estudiante">DNI Estudiante:</label>
-        <input type="text" id="dni_estudiante" name="dni_estudiante" required autofocus>
+        <div class="form-group">
+            <label for="dni_estudiante">DNI Estudiante:</label>
+            <input type="text" id="dni_estudiante" name="dni_estudiante" placeholder="Ingrese DNI..." required autofocus>
+        </div>
 
-        <label for="nombre_estudiante">Nombre Estudiante:</label>
-        <input type="text" id="nombre_estudiante" name="nombre_estudiante" readonly>
+        <div class="form-group">
+            <label for="nombre_estudiante">Nombre Estudiante:</label>
+            <input type="text" id="nombre_estudiante" name="nombre_estudiante" placeholder="Se cargará automáticamente..." readonly>
+        </div>
 
-        <label for="id_curso">Curso:</label>
-        <select id="id_curso" name="id_curso" required>
-            <option value="" disabled selected>Seleccione un curso</option>
-        </select>
+        <div class="form-group">
+            <label for="id_curso">Curso a Certificar:</label>
+            <select id="id_curso" name="id_curso" required>
+                <option value="" disabled selected>Seleccione un curso cursado</option>
+            </select>
+        </div>
 
-        <div class="button-container">
-            <button type="submit" class="btn">Generar Certificado</button>
-            <a href="{{ url_for('index') }}" class="button button-back">Back</a>
+        <div class="button-group">
+            <button type="submit" class="btn">Generar PDF</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Regresar</a>
         </div>
     </form>
+</div>
+{% endblock %}
 
-    <script>
-        document.getElementById('dni_estudiante').addEventListener('input', function() {
-            var dni = this.value;
-            fetch('/obtener_estudiante?dni_estudiante=' + dni)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                        document.getElementById('nombre_estudiante').value = '';
-                    } else {
-                        document.getElementById('nombre_estudiante').value = data.nombre;
-                    }
-                });
+{% block extra_js %}
+<script>
+document.getElementById('dni_estudiante').addEventListener('input', function() {
+    var dni = this.value;
+    if (dni.length >= 4) {
+        fetch('/obtener_estudiante?dni_estudiante=' + dni)
+            .then(response => response.json())
+            .then(data => {
+                if (data.nombre) {
+                    document.getElementById('nombre_estudiante').value = data.nombre;
+                } else {
+                    document.getElementById('nombre_estudiante').value = '';
+                }
+            });
 
-            fetch('/obtener_cursos?dni_estudiante=' + dni)
-                .then(response => response.json())
-                .then(data => {
-                    var cursoSelect = document.getElementById('id_curso');
-                    cursoSelect.innerHTML = '<option value="" disabled selected>Seleccione un curso</option>';
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        data.forEach(curso => {
-                            var option = document.createElement('option');
-                            option.value = curso.id_curso;
-                            option.textContent = curso.nombre_curso;
-                            cursoSelect.appendChild(option);
-                        });
-                    }
-                });
-        });
+        fetch('/obtener_cursos?dni_estudiante=' + dni)
+            .then(response => response.json())
+            .then(data => {
+                var cursoSelect = document.getElementById('id_curso');
+                cursoSelect.innerHTML = '<option value="" disabled selected>Seleccione un curso cursado</option>';
+                if (!data.error) {
+                    data.forEach(curso => {
+                        var option = document.createElement('option');
+                        option.value = curso.id_curso;
+                        option.textContent = curso.nombre_curso;
+                        cursoSelect.appendChild(option);
+                    });
+                }
+            });
+    }
+});
 
-        document.getElementById('certificadoForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        fetch('/generar_certificado', {
-            method: 'POST',
-            body: new FormData(this)
-        }).then(response => {
-            if (!response.ok) {
-                return response.json().then(errorData => {
-                    alert(errorData.error);
-                });
-            } else {
-                return response.blob();
-            }
-        }).then(blob => {
-            var url = window.URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = "certificado.pdf";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        }).catch(error => console.error(error));
+document.getElementById('certificadoForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const btn = event.submitter;
+    const originalText = btn.textContent;
+    btn.textContent = 'Generando...';
+    btn.disabled = true;
+
+    fetch('/generar_certificado', {
+        method: 'POST',
+        body: new FormData(this)
+    }).then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => { alert(errorData.error); throw new Error(); });
+        }
+        return response.blob();
+    }).then(blob => {
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = "certificado.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    }).catch(error => console.error(error))
+    .finally(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
     });
-    </script>
-</body>
-</html>
+});
+</script>
+{% endblock %}

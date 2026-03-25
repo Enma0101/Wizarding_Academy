@@ -1,255 +1,121 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Profesores</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+{% extends 'layout/base.html' %}
 
-        body {
-            font-family: 'Roboto Condensed', sans-serif;
-            background-color: #1a472a;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-        }
+{% block title %}Lista de Profesores - Wizarding Academy Hub{% endblock %}
 
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 80%;
-            margin-top: 20px;
-            border-collapse: collapse;
-            background-color: rgba(51, 51, 51, 0.8);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #444;
-        }
-
-        th {
-            background-color: #e8bb05;
-            color: #333;
-        }
-
-        tr:nth-child(even) {
-            background-color: #333;
-        }
-
-        tr:nth-child(odd) {
-            background-color: #444;
-        }
-
-        .button {
-            background-color: #e8bb05;
-            color: #333;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 14px;
-            font-family: 'Roboto Condensed', sans-serif;
-            margin-right: 5px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .button:hover {
-            background-color: #d4a105;
-        }
-
-        .button-container {
-            text-align: right;
-            margin-top: 20px;
-        }
-
-        .button-back {
-            background-color: #e8bb05;
-            color: #1a1a1a;
-            border: none;
-            padding: 10px 40px;
-            border-radius: 100px;
-            cursor: pointer;
-            transition: background-color 0.5s;
-            font-size: 16px;
-            font-family: 'Roboto Condensed', sans-serif;
-            text-decoration: none;
-            margin-left: 10px;
-        }
-
-        .button-back:hover {
-            background-color: #d4a105;
-        }
-
-        .search-bar {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-        }
-
-        .search-label {
-            margin-right: 10px;
-        }
-
-        .search-input {
-            padding: 8px;
-            font-size: 14px;
-            border-radius: 55px;
-            border: 2px solid #d6d1d1;
-            background-color: rgba(51, 51, 51, 0.8);
-            color: #fff;
-        }
-
-        .search-button {
-            background-color: #e8bb05;
-            color: #f1e6e6;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .search-button:hover {
-            background-color: #d4a105;
-
-
-        }
-        .alert {
-            padding: 15px;
-            background-color: #dbdada;
-            color: rgb(10, 10, 10);
-            margin-bottom: 15px;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-
-            input[type="text"],
-            input[type="date"],
-            select {
-                width: 100%;
-            }
-        }
-
-        .not-found-message {
-            color: #ff6666;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-
-
-
-
-
-    </style>
-</head>
-<body>
-
-    <div class="flash-messages">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="flash-message flash-success">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
-
-
-
+{% block content %}
+<section class="page-header">
     <h1>Lista de Profesores</h1>
-    
-    <!-- Mensajes Flash -->
-   
-
-
-    <!-- Barra de búsqueda -->
-    <div class="search-bar">
+    <div class="search-container">
         <label for="search" class="search-label">Buscar por DNI:</label>
         <input type="text" id="search" class="search-input" onkeyup="filterProfessors()" placeholder="Ingrese DNI...">
     </div>
+</section>
 
+<div class="table-responsive">
     <table id="professors-table">
-        <tr>
-            <th>ID</th>
-            <th>DNI</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Fecha de Nacimiento</th>
-            <th>Dirección</th>
-            <th>Teléfono</th>
-            <th>Email</th>
-            <th>Género</th>
-            <th>Acciones</th>
-        </tr>
-        {% for profesor in profesores %}
-        <tr id="profesor-{{ profesor.id_profesor }}">
-            <td>{{ profesor.id_profesor }}</td>
-            <td>{{ profesor.dni_profesor }}</td>
-            <td>{{ profesor.nombre }}</td>
-            <td>{{ profesor.apellido }}</td>
-            <td>{{ profesor.fecha_nacimiento }}</td>
-            <td>{{ profesor.direccion }}</td>
-            <td>{{ profesor.telefono }}</td>
-            <td>{{ profesor.email }}</td>
-            <td>{{ profesor.genero }}</td>
-            <td>
-                <a href="{{ url_for('edit_profesor', id=profesor.id_profesor) }}" class="button">Editar</a>
-                <form method="POST" action="{{ url_for('delete_profesor', id=profesor.id_profesor) }}" style="display: inline;">
-                    <button type="submit" class="button" onclick="return confirm('¿Estás seguro de eliminar este profesor?')">Eliminar</button>
-                </form>
-                <a href="{{ url_for('profesor_cursos_asignados', id=profesor.id_profesor) }}" class="button">Ver Cursos Asignados</a>
-            </td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profesor in profesores %}
+            <tr>
+                <td>{{ profesor.id_profesor }}</td>
+                <td>{{ profesor.dni_profesor }}</td>
+                <td>{{ profesor.nombre }}</td>
+                <td>{{ profesor.apellido }}</td>
+                <td>{{ profesor.email }}</td>
+                <td class="actions-cell">
+                    <a href="{{ url_for('edit_profesor', id=profesor.id_profesor) }}" class="btn btn-sm">Editar</a>
+                    <a href="{{ url_for('profesor_cursos_asignados', id=profesor.id_profesor) }}" class="btn btn-sm btn-secondary">Cursos</a>
+                    <form method="POST" action="{{ url_for('delete_profesor', id=profesor.id_profesor) }}" class="inline-form">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este profesor?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
+</div>
 
-    <div class="button-container">
-        <a href="{{ url_for('index') }}" class="button button-back">Back</a>
-    </div>
+<div class="footer-actions">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Regresar al Inicio</a>
+</div>
+{% endblock %}
 
-    <script>
-        function filterProfessors() {
-            var input, filter, table, tr, td, i, txtValue;
-            input = document.getElementById("search");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("professors-table");
-            tr = table.getElementsByTagName("tr");
+{% block extra_js %}
+<script>
+    function filterProfessors() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("search");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("professors-table");
+        tr = table.getElementsByTagName("tr");
 
-            for (i = 0; i < tr.length; i++) {
-                td = tr[i].getElementsByTagName("td")[1];
-                if (td) {
-                    txtValue = td.textContent || td.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
+        for (i = 1; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1]; // DNI column
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
                 }
             }
         }
-    </script>
-</body>
-</html>
+    }
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+        gap: 20px;
+    }
+    .search-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background-color: var(--card-bg);
+        padding: 5px 20px;
+        border-radius: 50px;
+        border: 1px solid var(--border-color);
+    }
+    .search-input {
+        background: transparent;
+        border: none;
+        color: white;
+        padding: 8px;
+        outline: none;
+    }
+    .actions-cell {
+        display: flex;
+        gap: 5px;
+    }
+    .inline-form {
+        display: inline;
+    }
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.85rem;
+    }
+    .btn-danger {
+        background-color: #c62828;
+    }
+    .footer-actions {
+        margin-top: 30px;
+        text-align: right;
+    }
+</style>
+{% endblock %}

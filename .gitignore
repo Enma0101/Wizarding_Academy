@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+env/
+.env
+.venv
+
+# Flask
+instance/
+.webassets-cache
+
+# Databases
+*.sqlite3
+*.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+app/static/certificados/
+*.pdf
+!app/static/certificado_template.pdf

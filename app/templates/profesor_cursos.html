@@ -1,151 +1,79 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cursos Asignados al Profesor</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+{% extends 'layout/base.html' %}
 
-        body {
-            font-family: 'Roboto Condensed', sans-serif;
-            background-color: #1a472a;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-        }
+{% block title %}Cursos Asignados - Wizarding Academy Hub{% endblock %}
 
-        .container {
-            width: 80%;
-            margin-top: 20px;
-            background-color: rgba(51, 51, 51, 0.8);
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            padding: 20px;
-        }
+{% block content %}
+<section class="page-header">
+    <h1>Cursos Asignados</h1>
+    {% if profesor %}
+        <p class="subtitle">Profesor: <strong>{{ profesor['nombre'] }} {{ profesor['apellido'] }}</strong></p>
+    {% endif %}
+</section>
 
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #444;
-        }
-
-        th {
-            background-color: #e8bb05;
-            color: #333;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #333;
-        }
-
-        tr:nth-child(odd) {
-            background-color: #444;
-        }
-
-        .btn-back {
-            background-color: #e8bb05;
-            color: #1a1a1a;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 14px;
-            font-family: 'Roboto Condensed', sans-serif;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 20px;
-        }
-
-        .btn-back:hover {
-            background-color: #d4a105;
-        }
-
-        .btn-delete {
-            background-color: #d4a105;
-            color: #252424;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 14px;
-            font-family: 'Roboto Condensed', sans-serif;
-        }
-
-        .btn-delete:hover {
-            background-color: #d4a105;
-        }
-        
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Cursos Asignados al Profesor</h1>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+<div class="container-fluid">
+    {% if cursos %}
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Curso</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th class="actions-cell">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for curso in cursos %}
+                <tr>
+                    <td>{{ curso['id_curso'] }}</td>
+                    <td>{{ curso['nombre_curso'] }}</td>
+                    <td>{{ curso['descripcion'] }}</td>
+                    <td class="actions-cell">
+                        <form action="{{ url_for('eliminar_asignacion', id_profesor=id, id_curso=curso['id_curso']) }}" method="post" class="inline-form">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta asignación?')">Eliminar Asignación</button>
+                        </form>
+                    </td>
+                </tr>
                 {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        {% if profesor %}
-            <h2>{{ profesor['nombre'] }} {{ profesor['apellido'] }}</h2>
-            {% if cursos %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID Curso</th>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for curso in cursos %}
-                        <tr>
-                            <td>{{ curso['id_curso'] }}</td>
-                            <td>{{ curso['nombre_curso'] }}</td>
-                            <td>{{ curso['descripcion'] }}</td>
-                            <td>
-                                <form action="{{ url_for('eliminar_asignacion', id_profesor=id, id_curso=curso['id_curso']) }}" method="post">
-                                    <button type="submit" class="btn-delete">Eliminar Asignación</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <a href="{{ url_for('profesores') }}" class="btn-back">Volver a la lista de Profesores</a>
-            {% else %}
-                <p>No hay cursos asignados a este profesor.</p>
-                <a href="{{ url_for('profesores') }}" class="btn-back">Volver a la lista de Profesores</a>
-            {% endif %}
-        {% else %}
-            <p>No se encontró información del profesor.</p>
-            <a href="{{ url_for('profesores') }}" class="btn-back">Volver a la lista de Profesores</a>
-        {% endif %}
+            </tbody>
+        </table>
     </div>
-</body>
-</html>
+    {% else %}
+    <div class="form-card" style="text-align: center;">
+        <p>No hay cursos asignados a este profesor recientemente.</p>
+    </div>
+    {% endif %}
+
+    <div class="footer-actions">
+        <a href="{{ url_for('profesores') }}" class="btn btn-secondary">Volver a Profesores</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 30px;
+    }
+    .subtitle {
+        font-size: 1.2rem;
+        color: var(--gold);
+        margin-top: 5px;
+    }
+    .actions-cell {
+        display: flex;
+        justify-content: flex-end;
+    }
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    .btn-danger {
+        background-color: #c62828;
+    }
+    .footer-actions {
+        margin-top: 30px;
+        text-align: right;
+    }
+</style>
+{% endblock %}
